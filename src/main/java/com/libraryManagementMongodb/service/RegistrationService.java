@@ -7,7 +7,6 @@ import com.libraryManagementMongodb.model.UserCollection;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
 
 public interface RegistrationService {
 
