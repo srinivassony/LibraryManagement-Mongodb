@@ -1,70 +1,55 @@
-package com.libraryManagementMongodb.model;
+package com.libraryManagementMongodb.dto;
 
 import java.time.LocalDateTime;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
-
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-@Document(collection = "lm_user")
-public class UserCollection {
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
-    @Id
-    @Field(name = "id")
+public class UserServiceDTO {
+
     private String id;
 
-    @Field(name = "USER_NAME")
+    @Size(min = 2, max = 30, message = "Username must be between 2 and 50 characters")
     private String userName;
 
-    @Field(name = "EMAIL")
+    @Email(message = "Invalid email format")
     private String email;
 
-    @Field(name = "PASSWORD")
     private String password;
 
-    @Field(name = "ROLE")
     private String role;
 
-    @Field(name = "UUID")
     private String uuid;
 
-    @Field(name = "PHONE")
+    @Pattern(regexp = "^[0-9]{10}$", message = "Phone number must be exactly 10// digits")
     private String phone;
 
-    @Field(name = "DOB")
     @JsonFormat(pattern = "dd-MM-yyyy")
     private String dob;
 
-    @Field(name = "ROLL_NO")
     private String rollNo;
 
-    @Field(name = "COUNTRY")
     private String country;
 
-    @Field(name = "STATE")
     private String state;
 
-    @Field(name = "GENDER")
     private String gender;
 
-    @Field(name = "CREATED_AT")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy'T'HH:mm:ss")
     private LocalDateTime createdAt;
 
-    @Field(name = "CREATED_BY")
     private String createdBy;
 
-    @Field(name = "UPDATED_AT")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy'T'HH:mm:ss")
+    private Boolean isAdmin;
+
     private LocalDateTime updatedAt;
 
-    @Field(name = "UPDATED_BY")
     private String updatedBy;
 
-    public UserCollection() {
-        this.uuid = java.util.UUID.randomUUID().toString(); // Generating UUID
+    public UserServiceDTO() {
+
     }
 
     public String getId() {
@@ -177,6 +162,14 @@ public class UserCollection {
 
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
+    }
+
+    public Boolean getIsAdmin() {
+        return isAdmin;
+    }
+
+    public void setIsAdmin(Boolean isAdmin) {
+        this.isAdmin = isAdmin;
     }
 
     public LocalDateTime getUpdatedAt() {
