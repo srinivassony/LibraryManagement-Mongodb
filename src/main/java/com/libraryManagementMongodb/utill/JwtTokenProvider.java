@@ -4,8 +4,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import com.libraryManagementMongodb.dto.UserInfoDTO;
@@ -16,6 +19,9 @@ import io.jsonwebtoken.SignatureAlgorithm;
 
 @Component
 public class JwtTokenProvider {
+
+    @Autowired
+    UserInfo userInfo;
 
     private final String jwtSecret = "LibraryManagement";
     private final long jwtExpirationMs = 86400000; // 24 hours
@@ -51,6 +57,14 @@ public class JwtTokenProvider {
         Claims claims = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody();
 
         return (List<String>) claims.get("roles"); // Roles stored as a list in JWT
+    }
+
+    public Authentication getAuthentication(String token) {
+
+        UserDetails userDetails = userInfo.loadUserByUsername(getEmailFromToken(token));
+
+        return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+
     }
 
 }

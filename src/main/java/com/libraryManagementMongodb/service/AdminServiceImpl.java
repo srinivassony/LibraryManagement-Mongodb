@@ -2,6 +2,7 @@ package com.libraryManagementMongodb.service;
 
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,24 +39,16 @@ public class AdminServiceImpl implements AdminService {
 
             Pageable pageable = PageRequest.of(page, size);
 
-            Page<UserCollection> getStudentData = adminDAO.getStudentRole(role, pageable);
+            Page<UserCollection> studentDataPage = adminDAO.getStudentRole(role, pageable);
 
-            // Map<String, Object> finalUserList = new LinkedHashMap<>();
-            // finalUserList.put("users", getStudentData.getContent());
-            // finalUserList.put("currentPage", getStudentData.getNumber());
-            // finalUserList.put("totalItems", getStudentData.getTotalElements());
-            // finalUserList.put("totalPages", getStudentData.getTotalPages());
-
-            CustomResponse<?> responseBody = new CustomResponse<>(getStudentData, "SUCCESS",
+            CustomResponse<?> responseBody = new CustomResponse<>(studentDataPage, "SUCCESS",
                     HttpStatus.OK.value(),
                     req.getRequestURI(), LocalDateTime.now());
 
             return new ResponseEntity<>(responseBody, HttpStatus.OK);
         } catch (Exception e) {
 
-            String stackTrace = utills.getStackTraceAsString(e);
-
-            CustomResponse<String> responseBody = new CustomResponse<>(stackTrace,
+            CustomResponse<String> responseBody = new CustomResponse<>(e.getMessage(),
                     "BAD_REQUEST",
                     HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
             return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
