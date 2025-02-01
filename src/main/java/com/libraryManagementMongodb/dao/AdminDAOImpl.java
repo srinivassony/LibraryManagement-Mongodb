@@ -1,5 +1,7 @@
 package com.libraryManagementMongodb.dao;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,6 +15,12 @@ public class AdminDAOImpl implements AdminDAO {
 
     @Autowired
     UserRepo userRepo;
+
+    // @Override
+    // public List<UserCollection> getStudentRole(String role) {
+    //     // TODO Auto-generated method stub
+    //     return userRepo.findByRole(role);
+    // }
 
     @Override
     public Page<UserCollection> getStudentRole(String role, Pageable pageable) {
