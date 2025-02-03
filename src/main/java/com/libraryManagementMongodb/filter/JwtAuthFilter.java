@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
@@ -58,11 +59,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     userToken.setDetails(new WebAuthenticationDetails(request));
                     request.setAttribute("user", userDetails);
                     SecurityContextHolder.getContext().setAuthentication(userToken);
+                    // Authentication auth = jwtTokenProvider.getAuthentication(token);
+                    // SecurityContextHolder.getContext().setAuthentication(auth);
                 }
             }
 
             // Continue the filter chain
-            filterChain.doFilter(request, response);
+        filterChain.doFilter(request, response);
+
 
         } catch (ExpiredJwtException ex) {
             // Handle the ExpiredJwtException
@@ -75,6 +79,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             handleJwtException(response, "An error occurred while processing your request.",
                     HttpStatus.BAD_REQUEST.value());
         }
+
+        // filterChain.doFilter(request, response);
     }
 
     /**
