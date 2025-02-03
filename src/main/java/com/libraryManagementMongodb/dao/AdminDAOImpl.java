@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.coyote.BadRequestException;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -60,13 +61,17 @@ public class AdminDAOImpl implements AdminDAO {
     // }
 
     @Override
-    public UserServiceDTO updateUserInfo(String id, UserServiceDTO userServiceDTO, UserInfoDTO userDetails) {
+    public UserServiceDTO updateUserInfo(String id, UserServiceDTO userServiceDTO, UserInfoDTO userDetails){
 
-        ObjectId objectId = new ObjectId(id);
+        // ObjectId objectId;
 
-        System.out.println("id" + objectId);
-
-        return userRepo.findById(objectId)
+        // try {
+        //     objectId = new ObjectId(id); // Convert String to ObjectId
+        // } catch (IllegalArgumentException e) {
+        //     throw new BadRequestException("Invalid ObjectId format: " + id);
+        // }
+        System.out.println("Converted ObjectId: " + id);
+        return userRepo.findById(id)
                 .map(entity -> {
                     // Update other fields as needed
 
@@ -110,17 +115,17 @@ public class AdminDAOImpl implements AdminDAO {
                         + id));
     }
 
-    @Override
-    public Optional<UserCollection> deleteUserInfo(String id) {
-        Optional<UserCollection> user = userRepo.findById(id);
-        if (user.isPresent()) {
-            // Delete the user entity
-            userRepo.deleteById(id);
-            return user;
-        } else {
-            return Optional.empty();
-        }
-    }
+    // @Override
+    // public Optional<UserCollection> deleteUserInfo(String id) {
+    //     Optional<UserCollection> user = userRepo.findById(id);
+    //     if (user.isPresent()) {
+    //         // Delete the user entity
+    //         userRepo.deleteById(id);
+    //         return user;
+    //     } else {
+    //         return Optional.empty();
+    //     }
+    // }
 
     @Override
     public List<UserCollection> getExisitingUsers(List<String> emails) {

@@ -216,23 +216,23 @@ public class AdminServiceImpl implements AdminService {
 
         try {
 
-            if (id.isBlank() || id.isEmpty()) {
+            // if (id.isBlank() || id.isEmpty()) {
 
-                String errorMessages = "Id is required!";
+            //     String errorMessages = "Id is required!";
 
-                CustomResponse<String> responseBody = new CustomResponse<>(errorMessages,
-                        "BAD_REQUEST",
-                        HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
+            //     CustomResponse<String> responseBody = new CustomResponse<>(errorMessages,
+            //             "BAD_REQUEST",
+            //             HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
 
-                return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
-            }
+            //     return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+            // }
 
             UserServiceDTO updateUser = adminDAO.updateUserInfo(id, userServiceDTO,
                     userDetails);
 
             System.out.println("UPDATE USER " + " " + updateUser.getId());
 
-            CustomResponse<?> responseBody = new CustomResponse<>("updateUser", "UPDATED", HttpStatus.OK.value(),
+            CustomResponse<?> responseBody = new CustomResponse<>(updateUser, "UPDATED", HttpStatus.OK.value(),
                     req.getRequestURI(), LocalDateTime.now());
 
             return new ResponseEntity<>(responseBody, HttpStatus.OK);
@@ -265,7 +265,8 @@ public class AdminServiceImpl implements AdminService {
                 return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
             }
 
-            Optional<UserCollection> deleteUser = adminDAO.deleteUserInfo(id);
+            Optional<UserCollection> deleteUser = null;
+            // adminDAO.deleteUserInfo(id);
 
             if (deleteUser.isEmpty()) {
 

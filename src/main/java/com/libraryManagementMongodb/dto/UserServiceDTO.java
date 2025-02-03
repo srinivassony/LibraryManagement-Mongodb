@@ -20,12 +20,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UserServiceDTO {
 
-    public UserServiceDTO(String id2, String userName2, String email2, String role2, String country2, String state2,
-            String dob2, String phone2, String rollNo2, String gender2, LocalDateTime createdAt2, String createdBy2,
-            LocalDateTime updatedAt2, String updatedBy2) {
-        // TODO Auto-generated constructor stub
-    }
-
     private String id;
 
     @Size(min = 2, max = 30, message = "Username must be between 2 and 50 characters")
@@ -69,4 +63,25 @@ public class UserServiceDTO {
     private LocalDateTime updatedAt;
 
     private String updatedBy;
+
+    public UserServiceDTO(String id, String userName, String email, String role, String country, String state,
+            String dob, String phone, String rollNo, String gender, LocalDateTime createdAt, String createdBy,
+            LocalDateTime updatedAt, String updatedBy) {
+
+        this.id = id;
+        this.userName = userName;
+        this.email = email;
+        this.role = role;
+        this.phone = phone;
+        this.dob = dob;
+        this.rollNo = rollNo;
+        this.country = country;
+        this.state = state;
+        this.gender = gender;
+        this.createdAt = createdAt;
+        this.createdBy = createdBy;
+        this.updatedAt = updatedAt;
+        this.updatedBy = updatedBy;
+    }
+
 }

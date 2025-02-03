@@ -5,6 +5,7 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.coyote.BadRequestException;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 
@@ -19,7 +20,7 @@ public interface AdminDAO {
 
     UserServiceDTO updateUserInfo(String id, UserServiceDTO userServiceDTO, UserInfoDTO userDetails);
 
-    Optional<UserCollection> deleteUserInfo(String id);
+    // Optional<UserCollection> deleteUserInfo(String id);
 
     List<UserCollection> getExisitingUsers(List<String> emails);
 

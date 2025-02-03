@@ -1,6 +1,7 @@
 package com.libraryManagementMongodb.model;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
@@ -22,7 +23,8 @@ public class UserCollection {
 
     @Id
     @Field(name = "id")
-    private String id;
+    @Indexed(unique = true)
+    private String id =  UUID.randomUUID().toString();
 
     @Field(name = "USER_NAME")
     private String userName;
