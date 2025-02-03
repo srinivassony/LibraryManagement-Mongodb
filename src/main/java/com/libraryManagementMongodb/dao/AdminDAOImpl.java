@@ -62,14 +62,6 @@ public class AdminDAOImpl implements AdminDAO {
 
     @Override
     public UserServiceDTO updateUserInfo(String id, UserServiceDTO userServiceDTO, UserInfoDTO userDetails){
-
-        // ObjectId objectId;
-
-        // try {
-        //     objectId = new ObjectId(id); // Convert String to ObjectId
-        // } catch (IllegalArgumentException e) {
-        //     throw new BadRequestException("Invalid ObjectId format: " + id);
-        // }
         System.out.println("Converted ObjectId: " + id);
         return userRepo.findById(id)
                 .map(entity -> {
