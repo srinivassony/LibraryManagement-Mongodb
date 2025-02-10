@@ -138,7 +138,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     private void validateBookHeaders(Row headerRow) {
-        List<String> requiredHeaders = List.of("bookName", "author", "description");
+        List<String> requiredHeaders = List.of("bookName", "author", "description", "noOfSets");
         for (int i = 0; i < requiredHeaders.size(); i++) {
             Cell cell = headerRow.getCell(i);
             if (cell == null ||
@@ -170,7 +170,14 @@ public class AdminServiceImpl implements AdminService {
         // Read "bookName" (column 0)
         Cell bookNameCell = row.getCell(0);
         if (bookNameCell != null && bookNameCell.getCellType() == CellType.STRING) {
-            book.setBookName(bookNameCell.getStringCellValue().trim());
+            String bookName = bookNameCell.getStringCellValue().trim();
+            if (!bookName.isEmpty()) {
+                book.setBookName(bookName);
+            } else {
+                throw new IllegalArgumentException("Invalid bookName format at row " + (row.getRowNum() + 1));
+            }
+        } else if (bookNameCell != null && bookNameCell.getCellType() == CellType.NUMERIC) {
+            book.setBookName(String.valueOf(bookNameCell.getNumericCellValue()).trim());
         } else {
             throw new IllegalArgumentException("Please enter the field bookName at row "
                     + (row.getRowNum() + 1));
@@ -179,18 +186,33 @@ public class AdminServiceImpl implements AdminService {
         // Read "author" (column 1)
         Cell authorCell = row.getCell(1);
         if (authorCell != null && authorCell.getCellType() == CellType.STRING) {
-            book.setAuthor(authorCell.getStringCellValue().trim());
+            String authorName = authorCell.getStringCellValue().trim();
+            if (!authorName.isEmpty()) {
+                book.setAuthor(authorName);
+            } else {
+                throw new IllegalArgumentException("Invalid authorName format at row " + (row.getRowNum() + 1));
+            }
+        } else if (authorCell != null && authorCell.getCellType() == CellType.NUMERIC) {
+            book.setAuthor(String.valueOf(authorCell.getNumericCellValue()).trim());
         } else {
-            throw new IllegalArgumentException("Please enter the field author at row " +
-                    (row.getRowNum() + 1));
+            throw new IllegalArgumentException("Please enter the field authorName at row "
+                    + (row.getRowNum() + 1));
         }
 
         // Read "description" (column 2)
         Cell descriptionCell = row.getCell(2);
         if (descriptionCell != null && descriptionCell.getCellType() == CellType.STRING) {
-            book.setDescription(descriptionCell.getStringCellValue().trim());
+            String description = descriptionCell.getStringCellValue().trim();
+            if (!description.isEmpty()) {
+                book.setDescription(description);
+            } else {
+                throw new IllegalArgumentException("Invalid description format at row " + (row.getRowNum() + 1));
+            }
+        } else if (descriptionCell != null && descriptionCell.getCellType() == CellType.NUMERIC) {
+            book.setDescription(String.valueOf(descriptionCell.getNumericCellValue()).trim());
         } else {
-            throw new IllegalArgumentException("Please enter the field description at row" + (row.getRowNum() + 1));
+            throw new IllegalArgumentException("Please enter the field description at row "
+                    + (row.getRowNum() + 1));
         }
 
         Cell noOFSetsCell = row.getCell(3);
