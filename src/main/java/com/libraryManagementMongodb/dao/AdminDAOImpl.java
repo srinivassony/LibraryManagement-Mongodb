@@ -45,23 +45,21 @@ public class AdminDAOImpl implements AdminDAO {
         }
     }
 
-    // @Override
-    // public List<BookCollection> uploadBooks(List<BookCollection> books) {
-    // // TODO Auto-generated method stub
-
-    // if (books != null && !books.isEmpty()) {
-    // // Save the users to the database
-    // List<BookCollection> savedUsers = bookRepo.saveAll(books);
-    // return savedUsers; // Return the saved users list
-    // } else {
-    // // If the list is empty or null, you can handle accordingly (e.g., return an
-    // // empty list)
-    // return new ArrayList<>();
-    // }
-    // }
+    @Override
+    public List<BookCollection> uploadBooks(List<BookCollection> books) {
+        if (books != null && !books.isEmpty()) {
+            // Save the users to the database
+            List<BookCollection> savedUsers = bookRepo.saveAll(books);
+            return savedUsers; // Return the saved users list
+        } else {
+            // If the list is empty or null, you can handle accordingly (e.g., return an
+            // empty list)
+            return new ArrayList<>();
+        }
+    }
 
     @Override
-    public UserServiceDTO updateUserInfo(String id, UserServiceDTO userServiceDTO, UserInfoDTO userDetails){
+    public UserServiceDTO updateUserInfo(String id, UserServiceDTO userServiceDTO, UserInfoDTO userDetails) {
         System.out.println("Converted ObjectId: " + id);
         return userRepo.findById(id)
                 .map(entity -> {
@@ -109,14 +107,14 @@ public class AdminDAOImpl implements AdminDAO {
 
     // @Override
     // public Optional<UserCollection> deleteUserInfo(String id) {
-    //     Optional<UserCollection> user = userRepo.findById(id);
-    //     if (user.isPresent()) {
-    //         // Delete the user entity
-    //         userRepo.deleteById(id);
-    //         return user;
-    //     } else {
-    //         return Optional.empty();
-    //     }
+    // Optional<UserCollection> user = userRepo.findById(id);
+    // if (user.isPresent()) {
+    // // Delete the user entity
+    // userRepo.deleteById(id);
+    // return user;
+    // } else {
+    // return Optional.empty();
+    // }
     // }
 
     @Override

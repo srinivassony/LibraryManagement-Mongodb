@@ -26,6 +26,6 @@ public interface AdminDAO {
 
     List<UserCollection> uploadUserInfo(List<UserCollection> users);
 
-    // List<BookCollection> uploadBooks(List<BookCollection> books);
+    List<BookCollection> uploadBooks(List<BookCollection> books);
 
 }

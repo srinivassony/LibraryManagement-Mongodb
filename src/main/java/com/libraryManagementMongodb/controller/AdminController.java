@@ -36,15 +36,15 @@ public class AdminController {
         return adminService.getStudentRole(req, res, page, size);
     }
 
-    // @PostMapping("/upload/bulk/books")
-    // public ResponseEntity<?> uploadBooksData(HttpServletRequest req,
-    // HttpServletResponse res,
-    // @RequestParam("file") MultipartFile file) {
+    @PostMapping("/upload/bulk/books")
+    public ResponseEntity<?> uploadBooksData(HttpServletRequest req,
+            HttpServletResponse res,
+            @RequestParam("file") MultipartFile file) {
 
-    // UserInfoDTO userDetails = (UserInfoDTO) req.getAttribute("user");
+        UserInfoDTO userDetails = (UserInfoDTO) req.getAttribute("user");
 
-    // return adminService.uploadBooksData(req, res, file, userDetails);
-    // }
+        return adminService.uploadBooksData(req, res, file, userDetails);
+    }
 
     @PostMapping("/update/user/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")

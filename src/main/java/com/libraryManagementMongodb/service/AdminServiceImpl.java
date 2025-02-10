@@ -72,143 +72,139 @@ public class AdminServiceImpl implements AdminService {
 
     }
 
-    // @Override
-    // public ResponseEntity<?> uploadBooksData(HttpServletRequest req,
-    // HttpServletResponse res, MultipartFile file,
-    // UserInfoDTO userDetails) {
+    @Override
+    public ResponseEntity<?> uploadBooksData(HttpServletRequest req,
+            HttpServletResponse res, MultipartFile file,
+            UserInfoDTO userDetails) {
 
-    // try {
-    // if (file.isEmpty()) {
+        try {
+            if (file.isEmpty()) {
 
-    // String errorMessage = "File is Empty !";
+                String errorMessage = "File is Empty !";
 
-    // CustomResponse<String> responseBody = new CustomResponse<>(errorMessage,
-    // "NOT_FOUND",
-    // HttpStatus.NOT_FOUND.value(), req.getRequestURI(), LocalDateTime.now());
+                CustomResponse<String> responseBody = new CustomResponse<>(errorMessage,
+                        "NOT_FOUND",
+                        HttpStatus.NOT_FOUND.value(), req.getRequestURI(), LocalDateTime.now());
 
-    // return new ResponseEntity<>(responseBody, HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>(responseBody, HttpStatus.NOT_FOUND);
 
-    // }
+            }
 
-    // if (!file.getOriginalFilename().endsWith(".xls") &&
-    // !file.getOriginalFilename().endsWith(".xlsx")) {
-    // String errorMessage = "Invalid file type! Please upload a valid Excel file.";
-    // CustomResponse<String> responseBody = new CustomResponse<>(errorMessage,
-    // "BAD_REQUEST",
-    // HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
-    // return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
-    // }
+            if (!file.getOriginalFilename().endsWith(".xls") &&
+                    !file.getOriginalFilename().endsWith(".xlsx")) {
+                String errorMessage = "Invalid file type! Please upload a valid Excel file.";
+                CustomResponse<String> responseBody = new CustomResponse<>(errorMessage,
+                        "BAD_REQUEST",
+                        HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
+                return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+            }
 
-    // List<BookCollection> books = new ArrayList<>();
-    // try {
-    // Workbook workbook = new XSSFWorkbook(file.getInputStream());
-    // Sheet sheet = workbook.getSheetAt(0);
-    // Row headerRow = sheet.getRow(0);
+            List<BookCollection> books = new ArrayList<>();
+            try {
+                Workbook workbook = new XSSFWorkbook(file.getInputStream());
+                Sheet sheet = workbook.getSheetAt(0);
+                Row headerRow = sheet.getRow(0);
 
-    // validateBookHeaders(headerRow);
+                validateBookHeaders(headerRow);
 
-    // for (int i = 1; i <= sheet.getLastRowNum(); i++) {
-    // Row row = sheet.getRow(i);
-    // if (rowEmpty(row)) {
-    // continue;
-    // }
-    // BookCollection book = validateAndParseBookRow(row, userDetails);
-    // books.add(book);
-    // }
-    // } catch (Exception e) {
-    // CustomResponse<String> responseBody = new CustomResponse<>(e.getMessage(),
-    // "BAD_REQUEST",
-    // HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
-    // return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
-    // }
+                for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+                    Row row = sheet.getRow(i);
+                    if (rowEmpty(row)) {
+                        continue;
+                    }
+                    BookCollection book = validateAndParseBookRow(row, userDetails);
+                    books.add(book);
+                }
+            } catch (Exception e) {
+                CustomResponse<String> responseBody = new CustomResponse<>(e.getMessage(),
+                        "BAD_REQUEST",
+                        HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
+                return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+            }
 
-    // List<BookCollection> booksList = adminDAO.uploadBooks(books);
+            List<BookCollection> booksList = adminDAO.uploadBooks(books);
 
-    // CustomResponse<?> responseBody = new CustomResponse<>(booksList, "SUCCESS",
-    // HttpStatus.OK.value(),
-    // req.getRequestURI(), LocalDateTime.now());
-    // return new ResponseEntity<>(responseBody, HttpStatus.OK);
+            CustomResponse<?> responseBody = new CustomResponse<>(booksList, "SUCCESS",
+                    HttpStatus.OK.value(),
+                    req.getRequestURI(), LocalDateTime.now());
+            return new ResponseEntity<>(responseBody, HttpStatus.OK);
 
-    // } catch (Exception e) {
-    // CustomResponse<String> responseBody = new CustomResponse<>(e.getMessage(),
-    // "BAD_REQUEST",
-    // HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
-    // return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
-    // }
-    // }
+        } catch (Exception e) {
+            CustomResponse<String> responseBody = new CustomResponse<>(e.getMessage(),
+                    "BAD_REQUEST",
+                    HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
+            return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+        }
+    }
 
-    // private void validateBookHeaders(Row headerRow) {
-    // List<String> requiredHeaders = List.of("bookName", "author", "description");
-    // for (int i = 0; i < requiredHeaders.size(); i++) {
-    // Cell cell = headerRow.getCell(i);
-    // if (cell == null ||
-    // !requiredHeaders.get(i).equalsIgnoreCase(cell.getStringCellValue().trim())) {
-    // throw new IllegalArgumentException("Invalid column name: " +
-    // requiredHeaders.get(i));
-    // }
-    // }
-    // }
+    private void validateBookHeaders(Row headerRow) {
+        List<String> requiredHeaders = List.of("bookName", "author", "description");
+        for (int i = 0; i < requiredHeaders.size(); i++) {
+            Cell cell = headerRow.getCell(i);
+            if (cell == null ||
+                    !requiredHeaders.get(i).equalsIgnoreCase(cell.getStringCellValue().trim())) {
+                throw new IllegalArgumentException("Invalid column name: " +
+                        requiredHeaders.get(i));
+            }
+        }
+    }
 
-    // private boolean rowEmpty(Row row) {
-    // if (row == null) {
-    // return true;
-    // }
-    // for (Cell cell : row) {
-    // if (cell != null && cell.getCellType() != CellType.BLANK) {
-    // String cellValue = cell.toString().trim();
-    // if (!cellValue.isEmpty()) {
-    // return false;
-    // }
-    // }
-    // }
-    // return true;
-    // }
+    private boolean rowEmpty(Row row) {
+        if (row == null) {
+            return true;
+        }
+        for (Cell cell : row) {
+            if (cell != null && cell.getCellType() != CellType.BLANK) {
+                String cellValue = cell.toString().trim();
+                if (!cellValue.isEmpty()) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 
-    // private BookCollection validateAndParseBookRow(Row row, UserInfoDTO
-    // userDetails) {
-    // BookCollection book = new BookCollection();
+    private BookCollection validateAndParseBookRow(Row row, UserInfoDTO userDetails) {
+        BookCollection book = new BookCollection();
 
-    // // Read "bookName" (column 0)
-    // Cell bookNameCell = row.getCell(0);
-    // if (bookNameCell != null && bookNameCell.getCellType() == CellType.STRING) {
-    // book.setBookName(bookNameCell.getStringCellValue().trim());
-    // } else {
-    // throw new IllegalArgumentException("Please enter the field bookName at row "
-    // + (row.getRowNum() + 1));
-    // }
+        // Read "bookName" (column 0)
+        Cell bookNameCell = row.getCell(0);
+        if (bookNameCell != null && bookNameCell.getCellType() == CellType.STRING) {
+            book.setBookName(bookNameCell.getStringCellValue().trim());
+        } else {
+            throw new IllegalArgumentException("Please enter the field bookName at row "
+                    + (row.getRowNum() + 1));
+        }
 
-    // // Read "author" (column 1)
-    // Cell authorCell = row.getCell(1);
-    // if (authorCell != null && authorCell.getCellType() == CellType.STRING) {
-    // book.setAuthor(authorCell.getStringCellValue().trim());
-    // } else {
-    // throw new IllegalArgumentException("Please enter the field author at row " +
-    // (row.getRowNum() + 1));
-    // }
+        // Read "author" (column 1)
+        Cell authorCell = row.getCell(1);
+        if (authorCell != null && authorCell.getCellType() == CellType.STRING) {
+            book.setAuthor(authorCell.getStringCellValue().trim());
+        } else {
+            throw new IllegalArgumentException("Please enter the field author at row " +
+                    (row.getRowNum() + 1));
+        }
 
-    // // Read "description" (column 2)
-    // Cell descriptionCell = row.getCell(2);
-    // if (descriptionCell != null && descriptionCell.getCellType() ==
-    // CellType.STRING) {
-    // book.setDescription(descriptionCell.getStringCellValue().trim());
-    // } else {
-    // throw new IllegalArgumentException("Please enter the field description at row
-    // " + (row.getRowNum() + 1));
-    // }
+        // Read "description" (column 2)
+        Cell descriptionCell = row.getCell(2);
+        if (descriptionCell != null && descriptionCell.getCellType() == CellType.STRING) {
+            book.setDescription(descriptionCell.getStringCellValue().trim());
+        } else {
+            throw new IllegalArgumentException("Please enter the field description at row" + (row.getRowNum() + 1));
+        }
 
-    // Cell noOFSetsCell = row.getCell(3);
-    // if (noOFSetsCell != null && noOFSetsCell.getCellType() == CellType.NUMERIC) {
-    // book.setNoOfSets((int) noOFSetsCell.getNumericCellValue());
-    // } else {
-    // throw new IllegalArgumentException("Please enter the field no of sets at row
-    // " + (row.getRowNum() + 1));
-    // }
+        Cell noOFSetsCell = row.getCell(3);
+        if (noOFSetsCell != null && noOFSetsCell.getCellType() == CellType.NUMERIC) {
+            book.setNoOfSets((int) noOFSetsCell.getNumericCellValue());
+        } else {
+            throw new IllegalArgumentException("Please enter the field no of sets at row" + (row.getRowNum() + 1));
+        }
 
-    // book.setCreatedAt(LocalDateTime.now());
-    // book.setCreatedBy(userDetails.getUuid());
+        book.setCreatedAt(LocalDateTime.now());
+        book.setCreatedBy(userDetails.getUuid());
 
-    // return book;
-    // }
+        return book;
+    }
 
     @Override
     public ResponseEntity<?> updateUserById(HttpServletRequest req, HttpServletResponse res, String id,
@@ -218,13 +214,13 @@ public class AdminServiceImpl implements AdminService {
 
             // if (id.isBlank() || id.isEmpty()) {
 
-            //     String errorMessages = "Id is required!";
+            // String errorMessages = "Id is required!";
 
-            //     CustomResponse<String> responseBody = new CustomResponse<>(errorMessages,
-            //             "BAD_REQUEST",
-            //             HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
+            // CustomResponse<String> responseBody = new CustomResponse<>(errorMessages,
+            // "BAD_REQUEST",
+            // HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
 
-            //     return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+            // return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
             // }
 
             UserServiceDTO updateUser = adminDAO.updateUserInfo(id, userServiceDTO,
