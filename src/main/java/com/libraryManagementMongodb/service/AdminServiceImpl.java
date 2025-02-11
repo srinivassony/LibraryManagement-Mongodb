@@ -27,9 +27,13 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.libraryManagementMongodb.config.CustomResponse;
 import com.libraryManagementMongodb.dao.AdminDAO;
+import com.libraryManagementMongodb.dto.BookServiceDTO;
+import com.libraryManagementMongodb.dto.StudentBookDTO;
+import com.libraryManagementMongodb.dto.UserBookViewDTO;
 import com.libraryManagementMongodb.dto.UserInfoDTO;
 import com.libraryManagementMongodb.dto.UserServiceDTO;
 import com.libraryManagementMongodb.model.BookCollection;
+import com.libraryManagementMongodb.model.StudentBookCollection;
 import com.libraryManagementMongodb.model.UserCollection;
 import com.libraryManagementMongodb.utill.Utills;
 
@@ -544,6 +548,223 @@ public class AdminServiceImpl implements AdminService {
         }
         System.out.println(user.getUserName());
         return user;
+    }
+
+    @Override
+    public ResponseEntity<?> updateBooksByBookId(HttpServletRequest req, HttpServletResponse res, String id,
+            BookServiceDTO bookServiceDTO) {
+
+        try {
+
+            if (id.isEmpty()) {
+
+                String errorMessages = "Id is required!";
+
+                CustomResponse<String> responseBody = new CustomResponse<>(errorMessages, "BAD_REQUEST",
+                        HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
+
+                return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+            }
+
+            BookServiceDTO updateBooks = adminDAO.updateBooksInfo(id, bookServiceDTO);
+
+            System.out.println("UPDATE BOOKS" + " " + updateBooks);
+
+            CustomResponse<?> responseBody = new CustomResponse<>(updateBooks, "SUCCESS",
+                    HttpStatus.OK.value(),
+                    req.getRequestURI(), LocalDateTime.now());
+
+            return new ResponseEntity<>(responseBody, HttpStatus.OK);
+
+        } catch (Exception e) {
+
+            CustomResponse<String> responseBody = new CustomResponse<>(e.getMessage(),
+                    "BAD_REQUEST",
+                    HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
+            return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> deleteBooksByBookId(HttpServletRequest req, HttpServletResponse res, String id) {
+
+        try {
+
+            if (id.isBlank()) {
+
+                String errorMessages = "Id is required!";
+
+                CustomResponse<String> responseBody = new CustomResponse<>(errorMessages, "BAD_REQUEST",
+                        HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
+
+                return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+            }
+
+            Optional<BookCollection> deleteBook = adminDAO.deleteBookInfo(id);
+
+            if (deleteBook.isEmpty()) {
+
+                String errorMessage = "Book not found with ID: " + id;
+
+                CustomResponse<String> responseBody = new CustomResponse<>(errorMessage, "NOT_FOUND",
+                        HttpStatus.NOT_FOUND.value(), req.getRequestURI(), LocalDateTime.now());
+
+                return new ResponseEntity<>(responseBody, HttpStatus.NOT_FOUND);
+            }
+
+            CustomResponse<?> responseBody = new CustomResponse<>("Book deleted successfully", "DELETED",
+                    HttpStatus.OK.value(),
+                    req.getRequestURI(), LocalDateTime.now());
+
+            return new ResponseEntity<>(responseBody, HttpStatus.OK);
+
+        } catch (Exception e) {
+
+            String stackTrace = utills.getStackTraceAsString(e);
+
+            CustomResponse<String> responseBody = new CustomResponse<>(stackTrace,
+                    "BAD_REQUEST",
+                    HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
+            return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> assignBookToUser(HttpServletRequest req, HttpServletResponse res,
+            StudentBookDTO studentBookDTO) {
+        try {
+
+            Optional<BookCollection> getBookDetails = adminDAO.getBookById(studentBookDTO.getBookId());
+
+            Optional<UserCollection> getUserDetails = adminDAO.getUserByRollNumber(studentBookDTO.getRollNumber());
+
+            if (getBookDetails.get().getId().isEmpty() || getUserDetails.get().getId().isEmpty()) {
+                String errorMessage = "Book ID or User ID is required!";
+
+                CustomResponse<String> responseBody = new CustomResponse<>(errorMessage, "BAD_REQUEST",
+                        HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
+
+                return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+            }
+
+            if (getBookDetails.get().getNoOfSets() <= 0) {
+                String errorMessage = "No sets available for the book";
+
+                CustomResponse<String> responseBody = new CustomResponse<>(errorMessage, "BAD_REQUEST",
+                        HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
+
+                return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+            }
+
+            Optional<StudentBookCollection> checkBookAssigned = adminDAO.checkBookAssigned(getBookDetails.get().getId(),
+                    getUserDetails.get().getId());
+
+            if (checkBookAssigned.isEmpty()) {
+                BookCollection bookEntity = getBookDetails.get();
+                bookEntity.setNoOfSets(getBookDetails.get().getNoOfSets() - 1);
+                bookEntity.setUpdatedAt(LocalDateTime.now());
+                bookEntity.setUpdatedBy(getUserDetails.get().getUuid());
+                adminDAO.updateBookDetails(bookEntity);
+
+                StudentBookCollection studentBook = new StudentBookCollection();
+                studentBook.setBook(getBookDetails.get());
+                studentBook.setUser(getUserDetails.get());
+                studentBook.setStatus("Pending");
+                studentBook.setSubmissionDate(LocalDateTime.now().plusDays(10));
+                studentBook.setCreatedAt(LocalDateTime.now());
+                studentBook.setCreatedBy(getUserDetails.get().getUuid());
+                StudentBookCollection createStudentBook = adminDAO.createStudentBook(studentBook);
+
+                CustomResponse<?> responseBody = new CustomResponse<>(createStudentBook, "SUCCESS",
+                        HttpStatus.OK.value(),
+                        req.getRequestURI(), LocalDateTime.now());
+
+                return new ResponseEntity<>(responseBody, HttpStatus.OK);
+            } else if (checkBookAssigned.get().getStatus().equalsIgnoreCase("submited")) {
+                BookCollection bookEntity = getBookDetails.get();
+                bookEntity.setNoOfSets(getBookDetails.get().getNoOfSets() - 1);
+                bookEntity.setUpdatedAt(LocalDateTime.now());
+                bookEntity.setUpdatedBy(getUserDetails.get().getUuid());
+                adminDAO.updateBookDetails(bookEntity);
+
+                StudentBookCollection studentBook = checkBookAssigned.get();
+                studentBook.setStatus("Pending");
+                studentBook.setSubmissionDate(LocalDateTime.now().plusDays(10));
+                studentBook.setUpdatedAt(LocalDateTime.now());
+                studentBook.setUpdatedBy(getUserDetails.get().getUuid());
+
+                StudentBookCollection updateStudentBook = adminDAO.createStudentBook(studentBook);
+
+                CustomResponse<?> responseBody = new CustomResponse<>(updateStudentBook, "SUCCESS",
+                        HttpStatus.OK.value(),
+                        req.getRequestURI(), LocalDateTime.now());
+
+                return new ResponseEntity<>(responseBody, HttpStatus.OK);
+            } else {
+
+                BookCollection bookEntity = getBookDetails.get();
+                bookEntity.setNoOfSets(getBookDetails.get().getNoOfSets() + 1);
+                bookEntity.setUpdatedAt(LocalDateTime.now());
+                bookEntity.setUpdatedBy(getUserDetails.get().getUuid());
+                adminDAO.updateBookDetails(bookEntity);
+
+                StudentBookCollection studentBook = checkBookAssigned.get();
+                studentBook.setStatus("Submited");
+                studentBook.setSubmissionDate(LocalDateTime.now());
+                studentBook.setUpdatedAt(LocalDateTime.now());
+                studentBook.setUpdatedBy(getUserDetails.get().getUuid());
+
+                StudentBookCollection updateStudentBook = adminDAO.createStudentBook(studentBook);
+
+                CustomResponse<?> responseBody = new CustomResponse<>(updateStudentBook, "SUCCESS",
+                        HttpStatus.OK.value(),
+                        req.getRequestURI(), LocalDateTime.now());
+
+                return new ResponseEntity<>(responseBody, HttpStatus.OK);
+
+            }
+        } catch (Exception e) {
+
+            CustomResponse<String> responseBody = new CustomResponse<>(e.getMessage(),
+                    "BAD_REQUEST",
+                    HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
+            return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> fetchUserBooksByUserId(HttpServletRequest req, HttpServletResponse res,
+            String id) {
+        try {
+
+            if (id.isEmpty()) {
+
+                String errorMessages = "Id is required!";
+
+                CustomResponse<String> responseBody = new CustomResponse<>(errorMessages, "BAD_REQUEST",
+                        HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
+
+                return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+            }
+
+            List<UserBookViewDTO> getUserBooks = adminDAO.getUserBooksById(id);
+
+            CustomResponse<?> responseBody = new CustomResponse<>(getUserBooks, "SUCCESS",
+                    HttpStatus.OK.value(),
+                    req.getRequestURI(), LocalDateTime.now());
+
+            return new ResponseEntity<>(responseBody, HttpStatus.OK);
+
+        } catch (Exception e) {
+
+            CustomResponse<String> responseBody = new CustomResponse<>(e.getMessage(),
+                    "BAD_REQUEST",
+                    HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
+            return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+
+        }
     }
 
 }

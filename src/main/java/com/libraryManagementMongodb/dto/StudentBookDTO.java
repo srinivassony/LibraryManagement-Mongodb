@@ -2,10 +2,8 @@ package com.libraryManagementMongodb.dto;
 
 import java.time.LocalDateTime;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Field;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.libraryManagementMongodb.model.BookCollection;
+import com.libraryManagementMongodb.model.UserCollection;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,17 +12,13 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class BookDTO {
+public class StudentBookDTO {
 
     private String id;
 
-    private String bookName;
+    private String status;
 
-    private String author;
-
-    private String description;
-
-    private Integer noOfSets;
+    private LocalDateTime SubmissionDate;
 
     private LocalDateTime createdAt;
 
@@ -33,4 +27,15 @@ public class BookDTO {
     private LocalDateTime updatedAt;
 
     private String updatedBy;
+
+    private UserCollection user;
+
+    private BookCollection book;
+
+    private String bookId;
+
+    private String userId;
+
+    private String rollNumber;
+
 }

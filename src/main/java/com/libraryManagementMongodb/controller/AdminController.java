@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.libraryManagementMongodb.dto.BookServiceDTO;
+import com.libraryManagementMongodb.dto.StudentBookDTO;
 import com.libraryManagementMongodb.dto.UserInfoDTO;
 import com.libraryManagementMongodb.dto.UserServiceDTO;
 import com.libraryManagementMongodb.service.AdminService;
@@ -71,6 +73,38 @@ public class AdminController {
             @RequestParam("file") MultipartFile file) {
         UserInfoDTO userDetails = (UserInfoDTO) req.getAttribute("user");
         return adminService.uploadUsersData(req, res, file, userDetails);
+    }
+
+    @PostMapping("/update/books/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<?> updateBooksByBookId(HttpServletRequest req, HttpServletResponse res,
+            @PathVariable("id") String id, @RequestBody BookServiceDTO bookServiceDTO) {
+
+        return adminService.updateBooksByBookId(req, res, id, bookServiceDTO);
+    }
+
+    @DeleteMapping("/delete/book/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<?> deleteBooksById(HttpServletRequest req, HttpServletResponse res,
+            @PathVariable("id") String id) {
+
+        return adminService.deleteBooksByBookId(req, res, id);
+    }
+
+    @PostMapping("/assign/book/user")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<?> assignBookToUser(HttpServletRequest req, HttpServletResponse res,
+            @RequestBody StudentBookDTO studentBookDTO) {
+
+        return adminService.assignBookToUser(req, res, studentBookDTO);
+    }
+
+    @GetMapping("/get/user/books")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_STUDENT')")
+    public ResponseEntity<?> fetchUserBooksByUserId(HttpServletRequest req, HttpServletResponse res,
+            @RequestParam String id) {
+
+        return adminService.fetchUserBooksByUserId(req, res, id);
     }
 
 }

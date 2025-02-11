@@ -1,9 +1,10 @@
 package com.libraryManagementMongodb.utill;
 
-
 import org.springframework.stereotype.Component;
 
+import com.libraryManagementMongodb.dto.BookServiceDTO;
 import com.libraryManagementMongodb.dto.UserServiceDTO;
+import com.libraryManagementMongodb.model.BookCollection;
 import com.libraryManagementMongodb.model.UserCollection;
 
 @Component
@@ -25,5 +26,18 @@ public class UtillDTO {
                 userCollection.getCreatedBy(),
                 userCollection.getUpdatedAt(),
                 userCollection.getUpdatedBy());
+    }
+
+    public BookServiceDTO convertToBookDTO(BookCollection bookEntity) {
+        return new BookServiceDTO(
+                bookEntity.getId(),
+                bookEntity.getBookName(),
+                bookEntity.getAuthor(),
+                bookEntity.getDescription(),
+                bookEntity.getNoOfSets(),
+                bookEntity.getCreatedAt(),
+                bookEntity.getCreatedBy(),
+                bookEntity.getUpdatedAt(),
+                bookEntity.getUpdatedBy());
     }
 }
