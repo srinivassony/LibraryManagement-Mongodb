@@ -25,7 +25,7 @@ public interface UserRepo extends MongoRepository<UserCollection, String> {
     @Aggregation(pipeline = {
             "{ $match: { _id: ?0 } }",
             // Stage 1: Lookup lm_student_book to find borrowed books for the user
-            "{ $lookup: { from: 'lm_student_book', localField: '_id', foreignField: 'user.$id', as: 'borrowedBooks' } }",
+            "{ $lookup: { from: 'lm_studentBook', localField: '_id', foreignField: 'user.$id', as: 'borrowedBooks' } }",
 
             // Stage 2: Unwind borrowedBooks array to get individual book records
             "{ $unwind: { path: '$borrowedBooks', preserveNullAndEmptyArrays: true } }",
@@ -37,19 +37,7 @@ public interface UserRepo extends MongoRepository<UserCollection, String> {
             "{ $unwind: { path: '$bookDetails', preserveNullAndEmptyArrays: true } }",
 
             // Stage 5: Project the required fields
-            "{ $project: { " +
-                    "   id: '$_id', " +
-                    "   userName: '$user_name', " +
-                    "   email: 1, " +
-                    "   userId: '$borrowedBooks.user.$id', " + // Extracting user ID from DBRef
-                    "   bookId: '$bookDetails._id', " +
-                    "   author: '$bookDetails.author', " +
-                    "   bookName: '$bookDetails.book_name', " +
-                    "   description: '$bookDetails.description', " +
-                    "   noOfSets: '$bookDetails.no_of_sets', " +
-                    "   submission_date: '$borrowedBooks.submission_date', " +
-                    "   status: '$borrowedBooks.status' " +
-                    "} }"
+            "{ $project: { _id:'$_id',user_name:'$USER_NAME',email:'$EMAIL',status:'$borrowedBooks.STATUS',submission_date: '$borrowedBooks.SUBMISSION_DATE',bookId: '$bookDetails._id',author: '$bookDetails.AUTHOR',book_name: '$bookDetails.BOOK_NAME',description: '$bookDetails.DESCRIPTION', no_of_sets: '$bookDetails.NO_OF_SETS'} }"
     })
     List<UserBookViewDTO> findUserBooksById(String id);
 

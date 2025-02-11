@@ -13,7 +13,7 @@ public class UserBookViewDTO {
 
     private String user_name;
 
-    private String email;
+    private String EMAIL;
 
     private String author;
 
