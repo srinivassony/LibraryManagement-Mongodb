@@ -110,17 +110,17 @@ public class AdminDAOImpl implements AdminDAO {
                         + id));
     }
 
-    // @Override
-    // public Optional<UserCollection> deleteUserInfo(String id) {
-    // Optional<UserCollection> user = userRepo.findById(id);
-    // if (user.isPresent()) {
-    // // Delete the user entity
-    // userRepo.deleteById(id);
-    // return user;
-    // } else {
-    // return Optional.empty();
-    // }
-    // }
+    @Override
+    public Optional<UserCollection> deleteUserInfo(String id) {
+        Optional<UserCollection> user = userRepo.findById(id);
+        if (user.isPresent()) {
+            // Delete the user entity
+            userRepo.deleteById(id);
+            return user;
+        } else {
+            return Optional.empty();
+        }
+    }
 
     @Override
     public List<UserCollection> getExisitingUsers(List<String> emails) {

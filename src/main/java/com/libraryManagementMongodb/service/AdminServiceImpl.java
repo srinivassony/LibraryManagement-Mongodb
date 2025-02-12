@@ -287,8 +287,7 @@ public class AdminServiceImpl implements AdminService {
                 return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
             }
 
-            Optional<UserCollection> deleteUser = null;
-            // adminDAO.deleteUserInfo(id);
+            Optional<UserCollection> deleteUser = adminDAO.deleteUserInfo(id);
 
             if (deleteUser.isEmpty()) {
 

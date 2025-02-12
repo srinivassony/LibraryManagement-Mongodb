@@ -23,7 +23,7 @@ public interface AdminDAO {
 
     UserServiceDTO updateUserInfo(String id, UserServiceDTO userServiceDTO, UserInfoDTO userDetails);
 
-    // Optional<UserCollection> deleteUserInfo(String id);
+    Optional<UserCollection> deleteUserInfo(String id);
 
     List<UserCollection> getExisitingUsers(List<String> emails);
 
