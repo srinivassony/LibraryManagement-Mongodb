@@ -107,4 +107,12 @@ public class AdminController {
         return adminService.fetchUserBooksByUserId(req, res, id);
     }
 
+    @GetMapping("/user/book/id")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<?> fetchUserBooksByBookId(HttpServletRequest req, HttpServletResponse res,
+            @RequestBody BookServiceDTO bookServiceDTO, @RequestParam int page, @RequestParam int size) {
+
+        return adminService.fetchUserBooksByBookId(req, res, bookServiceDTO, page, size);
+    }
+
 }

@@ -47,4 +47,6 @@ public interface AdminDAO {
 
     List<UserBookViewDTO> getUserBooksById(String id);
 
+    Page<UserBookViewDTO> getUserBooksInfoByBookId(String id, Pageable pageable);
+
 }

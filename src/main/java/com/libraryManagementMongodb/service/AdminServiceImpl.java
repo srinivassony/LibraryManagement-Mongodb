@@ -766,4 +766,48 @@ public class AdminServiceImpl implements AdminService {
         }
     }
 
+    @Override
+    public ResponseEntity<?> fetchUserBooksByBookId(HttpServletRequest req, HttpServletResponse res,
+            BookServiceDTO bookServiceDTO, int page, int size) {
+        try {
+
+            String id = bookServiceDTO.getId() != null ? bookServiceDTO.getId() : null;
+
+            if (id == null) {
+
+                String errorMessages = "Id is required!";
+
+                CustomResponse<String> responseBody = new CustomResponse<>(errorMessages, "BAD_REQUEST",
+                        HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
+
+                return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+            }
+
+            Pageable pageable = PageRequest.of(page, size);
+
+            Page<UserBookViewDTO> getUserBooksByBookId = adminDAO.getUserBooksInfoByBookId(bookServiceDTO.getId(),
+                    pageable);
+
+            Map<String, Object> finalUserBooksList = new LinkedHashMap<>();
+            finalUserBooksList.put("users", getUserBooksByBookId.getContent());
+            finalUserBooksList.put("currentPage", getUserBooksByBookId.getNumber());
+            finalUserBooksList.put("totalItems", getUserBooksByBookId.getTotalElements());
+            finalUserBooksList.put("totalPages", getUserBooksByBookId.getTotalPages());
+
+            CustomResponse<?> responseBody = new CustomResponse<>(finalUserBooksList, "SUCCESS",
+                    HttpStatus.OK.value(),
+                    req.getRequestURI(), LocalDateTime.now());
+
+            return new ResponseEntity<>(responseBody, HttpStatus.OK);
+
+        } catch (Exception e) {
+
+            CustomResponse<String> responseBody = new CustomResponse<>(e.getMessage(),
+                    "BAD_REQUEST",
+                    HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
+            return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+
+        }
+    }
+
 }

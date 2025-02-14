@@ -37,4 +37,7 @@ public interface AdminService {
 
         ResponseEntity<?> fetchUserBooksByUserId(HttpServletRequest req, HttpServletResponse res,
                         String id);
+
+        ResponseEntity<?> fetchUserBooksByBookId(HttpServletRequest req, HttpServletResponse res,
+                        BookServiceDTO bookServiceDTO, int page, int size);
 }
