@@ -27,9 +27,13 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.libraryManagementMongodb.config.CustomResponse;
 import com.libraryManagementMongodb.dao.AdminDAO;
+import com.libraryManagementMongodb.dto.BookServiceDTO;
+import com.libraryManagementMongodb.dto.StudentBookDTO;
+import com.libraryManagementMongodb.dto.UserBookViewDTO;
 import com.libraryManagementMongodb.dto.UserInfoDTO;
 import com.libraryManagementMongodb.dto.UserServiceDTO;
 import com.libraryManagementMongodb.model.BookCollection;
+import com.libraryManagementMongodb.model.StudentBookCollection;
 import com.libraryManagementMongodb.model.UserCollection;
 import com.libraryManagementMongodb.utill.Utills;
 
@@ -72,143 +76,161 @@ public class AdminServiceImpl implements AdminService {
 
     }
 
-    // @Override
-    // public ResponseEntity<?> uploadBooksData(HttpServletRequest req,
-    // HttpServletResponse res, MultipartFile file,
-    // UserInfoDTO userDetails) {
+    @Override
+    public ResponseEntity<?> uploadBooksData(HttpServletRequest req,
+            HttpServletResponse res, MultipartFile file,
+            UserInfoDTO userDetails) {
 
-    // try {
-    // if (file.isEmpty()) {
+        try {
+            if (file.isEmpty()) {
 
-    // String errorMessage = "File is Empty !";
+                String errorMessage = "File is Empty !";
 
-    // CustomResponse<String> responseBody = new CustomResponse<>(errorMessage,
-    // "NOT_FOUND",
-    // HttpStatus.NOT_FOUND.value(), req.getRequestURI(), LocalDateTime.now());
+                CustomResponse<String> responseBody = new CustomResponse<>(errorMessage,
+                        "NOT_FOUND",
+                        HttpStatus.NOT_FOUND.value(), req.getRequestURI(), LocalDateTime.now());
 
-    // return new ResponseEntity<>(responseBody, HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>(responseBody, HttpStatus.NOT_FOUND);
 
-    // }
+            }
 
-    // if (!file.getOriginalFilename().endsWith(".xls") &&
-    // !file.getOriginalFilename().endsWith(".xlsx")) {
-    // String errorMessage = "Invalid file type! Please upload a valid Excel file.";
-    // CustomResponse<String> responseBody = new CustomResponse<>(errorMessage,
-    // "BAD_REQUEST",
-    // HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
-    // return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
-    // }
+            if (!file.getOriginalFilename().endsWith(".xls") &&
+                    !file.getOriginalFilename().endsWith(".xlsx")) {
+                String errorMessage = "Invalid file type! Please upload a valid Excel file.";
+                CustomResponse<String> responseBody = new CustomResponse<>(errorMessage,
+                        "BAD_REQUEST",
+                        HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
+                return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+            }
 
-    // List<BookCollection> books = new ArrayList<>();
-    // try {
-    // Workbook workbook = new XSSFWorkbook(file.getInputStream());
-    // Sheet sheet = workbook.getSheetAt(0);
-    // Row headerRow = sheet.getRow(0);
+            List<BookCollection> books = new ArrayList<>();
+            try {
+                Workbook workbook = new XSSFWorkbook(file.getInputStream());
+                Sheet sheet = workbook.getSheetAt(0);
+                Row headerRow = sheet.getRow(0);
 
-    // validateBookHeaders(headerRow);
+                validateBookHeaders(headerRow);
 
-    // for (int i = 1; i <= sheet.getLastRowNum(); i++) {
-    // Row row = sheet.getRow(i);
-    // if (rowEmpty(row)) {
-    // continue;
-    // }
-    // BookCollection book = validateAndParseBookRow(row, userDetails);
-    // books.add(book);
-    // }
-    // } catch (Exception e) {
-    // CustomResponse<String> responseBody = new CustomResponse<>(e.getMessage(),
-    // "BAD_REQUEST",
-    // HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
-    // return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
-    // }
+                for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+                    Row row = sheet.getRow(i);
+                    if (rowEmpty(row)) {
+                        continue;
+                    }
+                    BookCollection book = validateAndParseBookRow(row, userDetails);
+                    books.add(book);
+                }
+            } catch (Exception e) {
+                CustomResponse<String> responseBody = new CustomResponse<>(e.getMessage(),
+                        "BAD_REQUEST",
+                        HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
+                return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+            }
 
-    // List<BookCollection> booksList = adminDAO.uploadBooks(books);
+            List<BookCollection> booksList = adminDAO.uploadBooks(books);
 
-    // CustomResponse<?> responseBody = new CustomResponse<>(booksList, "SUCCESS",
-    // HttpStatus.OK.value(),
-    // req.getRequestURI(), LocalDateTime.now());
-    // return new ResponseEntity<>(responseBody, HttpStatus.OK);
+            CustomResponse<?> responseBody = new CustomResponse<>(booksList, "SUCCESS",
+                    HttpStatus.OK.value(),
+                    req.getRequestURI(), LocalDateTime.now());
+            return new ResponseEntity<>(responseBody, HttpStatus.OK);
 
-    // } catch (Exception e) {
-    // CustomResponse<String> responseBody = new CustomResponse<>(e.getMessage(),
-    // "BAD_REQUEST",
-    // HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
-    // return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
-    // }
-    // }
+        } catch (Exception e) {
+            CustomResponse<String> responseBody = new CustomResponse<>(e.getMessage(),
+                    "BAD_REQUEST",
+                    HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
+            return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+        }
+    }
 
-    // private void validateBookHeaders(Row headerRow) {
-    // List<String> requiredHeaders = List.of("bookName", "author", "description");
-    // for (int i = 0; i < requiredHeaders.size(); i++) {
-    // Cell cell = headerRow.getCell(i);
-    // if (cell == null ||
-    // !requiredHeaders.get(i).equalsIgnoreCase(cell.getStringCellValue().trim())) {
-    // throw new IllegalArgumentException("Invalid column name: " +
-    // requiredHeaders.get(i));
-    // }
-    // }
-    // }
+    private void validateBookHeaders(Row headerRow) {
+        List<String> requiredHeaders = List.of("bookName", "author", "description", "noOfSets");
+        for (int i = 0; i < requiredHeaders.size(); i++) {
+            Cell cell = headerRow.getCell(i);
+            if (cell == null ||
+                    !requiredHeaders.get(i).equalsIgnoreCase(cell.getStringCellValue().trim())) {
+                throw new IllegalArgumentException("Invalid column name: " +
+                        requiredHeaders.get(i));
+            }
+        }
+    }
 
-    // private boolean rowEmpty(Row row) {
-    // if (row == null) {
-    // return true;
-    // }
-    // for (Cell cell : row) {
-    // if (cell != null && cell.getCellType() != CellType.BLANK) {
-    // String cellValue = cell.toString().trim();
-    // if (!cellValue.isEmpty()) {
-    // return false;
-    // }
-    // }
-    // }
-    // return true;
-    // }
+    private boolean rowEmpty(Row row) {
+        if (row == null) {
+            return true;
+        }
+        for (Cell cell : row) {
+            if (cell != null && cell.getCellType() != CellType.BLANK) {
+                String cellValue = cell.toString().trim();
+                if (!cellValue.isEmpty()) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 
-    // private BookCollection validateAndParseBookRow(Row row, UserInfoDTO
-    // userDetails) {
-    // BookCollection book = new BookCollection();
+    private BookCollection validateAndParseBookRow(Row row, UserInfoDTO userDetails) {
+        BookCollection book = new BookCollection();
 
-    // // Read "bookName" (column 0)
-    // Cell bookNameCell = row.getCell(0);
-    // if (bookNameCell != null && bookNameCell.getCellType() == CellType.STRING) {
-    // book.setBookName(bookNameCell.getStringCellValue().trim());
-    // } else {
-    // throw new IllegalArgumentException("Please enter the field bookName at row "
-    // + (row.getRowNum() + 1));
-    // }
+        // Read "bookName" (column 0)
+        Cell bookNameCell = row.getCell(0);
+        if (bookNameCell != null && bookNameCell.getCellType() == CellType.STRING) {
+            String bookName = bookNameCell.getStringCellValue().trim();
+            if (!bookName.isEmpty()) {
+                book.setBookName(bookName);
+            } else {
+                throw new IllegalArgumentException("Invalid bookName format at row " + (row.getRowNum() + 1));
+            }
+        } else if (bookNameCell != null && bookNameCell.getCellType() == CellType.NUMERIC) {
+            book.setBookName(String.valueOf(bookNameCell.getNumericCellValue()).trim());
+        } else {
+            throw new IllegalArgumentException("Please enter the field bookName at row "
+                    + (row.getRowNum() + 1));
+        }
 
-    // // Read "author" (column 1)
-    // Cell authorCell = row.getCell(1);
-    // if (authorCell != null && authorCell.getCellType() == CellType.STRING) {
-    // book.setAuthor(authorCell.getStringCellValue().trim());
-    // } else {
-    // throw new IllegalArgumentException("Please enter the field author at row " +
-    // (row.getRowNum() + 1));
-    // }
+        // Read "author" (column 1)
+        Cell authorCell = row.getCell(1);
+        if (authorCell != null && authorCell.getCellType() == CellType.STRING) {
+            String authorName = authorCell.getStringCellValue().trim();
+            if (!authorName.isEmpty()) {
+                book.setAuthor(authorName);
+            } else {
+                throw new IllegalArgumentException("Invalid authorName format at row " + (row.getRowNum() + 1));
+            }
+        } else if (authorCell != null && authorCell.getCellType() == CellType.NUMERIC) {
+            book.setAuthor(String.valueOf(authorCell.getNumericCellValue()).trim());
+        } else {
+            throw new IllegalArgumentException("Please enter the field authorName at row "
+                    + (row.getRowNum() + 1));
+        }
 
-    // // Read "description" (column 2)
-    // Cell descriptionCell = row.getCell(2);
-    // if (descriptionCell != null && descriptionCell.getCellType() ==
-    // CellType.STRING) {
-    // book.setDescription(descriptionCell.getStringCellValue().trim());
-    // } else {
-    // throw new IllegalArgumentException("Please enter the field description at row
-    // " + (row.getRowNum() + 1));
-    // }
+        // Read "description" (column 2)
+        Cell descriptionCell = row.getCell(2);
+        if (descriptionCell != null && descriptionCell.getCellType() == CellType.STRING) {
+            String description = descriptionCell.getStringCellValue().trim();
+            if (!description.isEmpty()) {
+                book.setDescription(description);
+            } else {
+                throw new IllegalArgumentException("Invalid description format at row " + (row.getRowNum() + 1));
+            }
+        } else if (descriptionCell != null && descriptionCell.getCellType() == CellType.NUMERIC) {
+            book.setDescription(String.valueOf(descriptionCell.getNumericCellValue()).trim());
+        } else {
+            throw new IllegalArgumentException("Please enter the field description at row "
+                    + (row.getRowNum() + 1));
+        }
 
-    // Cell noOFSetsCell = row.getCell(3);
-    // if (noOFSetsCell != null && noOFSetsCell.getCellType() == CellType.NUMERIC) {
-    // book.setNoOfSets((int) noOFSetsCell.getNumericCellValue());
-    // } else {
-    // throw new IllegalArgumentException("Please enter the field no of sets at row
-    // " + (row.getRowNum() + 1));
-    // }
+        Cell noOFSetsCell = row.getCell(3);
+        if (noOFSetsCell != null && noOFSetsCell.getCellType() == CellType.NUMERIC) {
+            book.setNoOfSets((int) noOFSetsCell.getNumericCellValue());
+        } else {
+            throw new IllegalArgumentException("Please enter the field no of sets at row" + (row.getRowNum() + 1));
+        }
 
-    // book.setCreatedAt(LocalDateTime.now());
-    // book.setCreatedBy(userDetails.getUuid());
+        book.setCreatedAt(LocalDateTime.now());
+        book.setCreatedBy(userDetails.getUuid());
 
-    // return book;
-    // }
+        return book;
+    }
 
     @Override
     public ResponseEntity<?> updateUserById(HttpServletRequest req, HttpServletResponse res, String id,
@@ -218,13 +240,13 @@ public class AdminServiceImpl implements AdminService {
 
             // if (id.isBlank() || id.isEmpty()) {
 
-            //     String errorMessages = "Id is required!";
+            // String errorMessages = "Id is required!";
 
-            //     CustomResponse<String> responseBody = new CustomResponse<>(errorMessages,
-            //             "BAD_REQUEST",
-            //             HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
+            // CustomResponse<String> responseBody = new CustomResponse<>(errorMessages,
+            // "BAD_REQUEST",
+            // HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
 
-            //     return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+            // return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
             // }
 
             UserServiceDTO updateUser = adminDAO.updateUserInfo(id, userServiceDTO,
@@ -265,8 +287,7 @@ public class AdminServiceImpl implements AdminService {
                 return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
             }
 
-            Optional<UserCollection> deleteUser = null;
-            // adminDAO.deleteUserInfo(id);
+            Optional<UserCollection> deleteUser = adminDAO.deleteUserInfo(id);
 
             if (deleteUser.isEmpty()) {
 
@@ -526,6 +547,267 @@ public class AdminServiceImpl implements AdminService {
         }
         System.out.println(user.getUserName());
         return user;
+    }
+
+    @Override
+    public ResponseEntity<?> updateBooksByBookId(HttpServletRequest req, HttpServletResponse res, String id,
+            BookServiceDTO bookServiceDTO) {
+
+        try {
+
+            if (id.isEmpty()) {
+
+                String errorMessages = "Id is required!";
+
+                CustomResponse<String> responseBody = new CustomResponse<>(errorMessages, "BAD_REQUEST",
+                        HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
+
+                return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+            }
+
+            BookServiceDTO updateBooks = adminDAO.updateBooksInfo(id, bookServiceDTO);
+
+            System.out.println("UPDATE BOOKS" + " " + updateBooks);
+
+            CustomResponse<?> responseBody = new CustomResponse<>(updateBooks, "SUCCESS",
+                    HttpStatus.OK.value(),
+                    req.getRequestURI(), LocalDateTime.now());
+
+            return new ResponseEntity<>(responseBody, HttpStatus.OK);
+
+        } catch (Exception e) {
+
+            CustomResponse<String> responseBody = new CustomResponse<>(e.getMessage(),
+                    "BAD_REQUEST",
+                    HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
+            return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> deleteBooksByBookId(HttpServletRequest req, HttpServletResponse res, String id) {
+
+        try {
+
+            if (id.isBlank()) {
+
+                String errorMessages = "Id is required!";
+
+                CustomResponse<String> responseBody = new CustomResponse<>(errorMessages, "BAD_REQUEST",
+                        HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
+
+                return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+            }
+
+            Optional<BookCollection> deleteBook = adminDAO.deleteBookInfo(id);
+
+            if (deleteBook.isEmpty()) {
+
+                String errorMessage = "Book not found with ID: " + id;
+
+                CustomResponse<String> responseBody = new CustomResponse<>(errorMessage, "NOT_FOUND",
+                        HttpStatus.NOT_FOUND.value(), req.getRequestURI(), LocalDateTime.now());
+
+                return new ResponseEntity<>(responseBody, HttpStatus.NOT_FOUND);
+            }
+
+            CustomResponse<?> responseBody = new CustomResponse<>("Book deleted successfully", "DELETED",
+                    HttpStatus.OK.value(),
+                    req.getRequestURI(), LocalDateTime.now());
+
+            return new ResponseEntity<>(responseBody, HttpStatus.OK);
+
+        } catch (Exception e) {
+
+            String stackTrace = utills.getStackTraceAsString(e);
+
+            CustomResponse<String> responseBody = new CustomResponse<>(stackTrace,
+                    "BAD_REQUEST",
+                    HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
+            return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> assignBookToUser(HttpServletRequest req, HttpServletResponse res,
+            StudentBookDTO studentBookDTO) {
+        try {
+
+            Optional<BookCollection> getBookDetails = adminDAO.getBookById(studentBookDTO.getBookId());
+
+            Optional<UserCollection> getUserDetails = adminDAO.getUserByRollNumber(studentBookDTO.getRollNumber());
+
+            if (getBookDetails.get().getId().isEmpty() || getUserDetails.get().getId().isEmpty()) {
+                String errorMessage = "Book ID or User ID is required!";
+
+                CustomResponse<String> responseBody = new CustomResponse<>(errorMessage, "BAD_REQUEST",
+                        HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
+
+                return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+            }
+
+            if (getBookDetails.get().getNoOfSets() <= 0) {
+                String errorMessage = "No sets available for the book";
+
+                CustomResponse<String> responseBody = new CustomResponse<>(errorMessage, "BAD_REQUEST",
+                        HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
+
+                return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+            }
+
+            Optional<StudentBookCollection> checkBookAssigned = adminDAO.checkBookAssigned(getBookDetails.get().getId(),
+                    getUserDetails.get().getId());
+
+            if (checkBookAssigned.isEmpty()) {
+                BookCollection bookEntity = getBookDetails.get();
+                bookEntity.setNoOfSets(getBookDetails.get().getNoOfSets() - 1);
+                bookEntity.setUpdatedAt(LocalDateTime.now());
+                bookEntity.setUpdatedBy(getUserDetails.get().getUuid());
+                adminDAO.updateBookDetails(bookEntity);
+
+                StudentBookCollection studentBook = new StudentBookCollection();
+                studentBook.setBook(getBookDetails.get());
+                studentBook.setUser(getUserDetails.get());
+                studentBook.setStatus("Pending");
+                studentBook.setSubmissionDate(LocalDateTime.now().plusDays(10));
+                studentBook.setCreatedAt(LocalDateTime.now());
+                studentBook.setCreatedBy(getUserDetails.get().getUuid());
+                StudentBookCollection createStudentBook = adminDAO.createStudentBook(studentBook);
+
+                CustomResponse<?> responseBody = new CustomResponse<>(createStudentBook, "SUCCESS",
+                        HttpStatus.OK.value(),
+                        req.getRequestURI(), LocalDateTime.now());
+
+                return new ResponseEntity<>(responseBody, HttpStatus.OK);
+            } else if (checkBookAssigned.get().getStatus().equalsIgnoreCase("submited")) {
+                BookCollection bookEntity = getBookDetails.get();
+                bookEntity.setNoOfSets(getBookDetails.get().getNoOfSets() - 1);
+                bookEntity.setUpdatedAt(LocalDateTime.now());
+                bookEntity.setUpdatedBy(getUserDetails.get().getUuid());
+                adminDAO.updateBookDetails(bookEntity);
+
+                StudentBookCollection studentBook = checkBookAssigned.get();
+                studentBook.setStatus("Pending");
+                studentBook.setSubmissionDate(LocalDateTime.now().plusDays(10));
+                studentBook.setUpdatedAt(LocalDateTime.now());
+                studentBook.setUpdatedBy(getUserDetails.get().getUuid());
+
+                StudentBookCollection updateStudentBook = adminDAO.createStudentBook(studentBook);
+
+                CustomResponse<?> responseBody = new CustomResponse<>(updateStudentBook, "SUCCESS",
+                        HttpStatus.OK.value(),
+                        req.getRequestURI(), LocalDateTime.now());
+
+                return new ResponseEntity<>(responseBody, HttpStatus.OK);
+            } else {
+
+                BookCollection bookEntity = getBookDetails.get();
+                bookEntity.setNoOfSets(getBookDetails.get().getNoOfSets() + 1);
+                bookEntity.setUpdatedAt(LocalDateTime.now());
+                bookEntity.setUpdatedBy(getUserDetails.get().getUuid());
+                adminDAO.updateBookDetails(bookEntity);
+
+                StudentBookCollection studentBook = checkBookAssigned.get();
+                studentBook.setStatus("Submited");
+                studentBook.setSubmissionDate(LocalDateTime.now());
+                studentBook.setUpdatedAt(LocalDateTime.now());
+                studentBook.setUpdatedBy(getUserDetails.get().getUuid());
+
+                StudentBookCollection updateStudentBook = adminDAO.createStudentBook(studentBook);
+
+                CustomResponse<?> responseBody = new CustomResponse<>(updateStudentBook, "SUCCESS",
+                        HttpStatus.OK.value(),
+                        req.getRequestURI(), LocalDateTime.now());
+
+                return new ResponseEntity<>(responseBody, HttpStatus.OK);
+
+            }
+        } catch (Exception e) {
+
+            CustomResponse<String> responseBody = new CustomResponse<>(e.getMessage(),
+                    "BAD_REQUEST",
+                    HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
+            return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> fetchUserBooksByUserId(HttpServletRequest req, HttpServletResponse res,
+            String id) {
+        try {
+
+            if (id.isEmpty()) {
+
+                String errorMessages = "Id is required!";
+
+                CustomResponse<String> responseBody = new CustomResponse<>(errorMessages, "BAD_REQUEST",
+                        HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
+
+                return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+            }
+
+            List<UserBookViewDTO> getUserBooks = adminDAO.getUserBooksById(id);
+
+            CustomResponse<?> responseBody = new CustomResponse<>(getUserBooks, "SUCCESS",
+                    HttpStatus.OK.value(),
+                    req.getRequestURI(), LocalDateTime.now());
+
+            return new ResponseEntity<>(responseBody, HttpStatus.OK);
+
+        } catch (Exception e) {
+
+            CustomResponse<String> responseBody = new CustomResponse<>(e.getMessage(),
+                    "BAD_REQUEST",
+                    HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
+            return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> fetchUserBooksByBookId(HttpServletRequest req, HttpServletResponse res,
+            BookServiceDTO bookServiceDTO, int page, int size) {
+        try {
+
+            String id = bookServiceDTO.getId() != null ? bookServiceDTO.getId() : null;
+
+            if (id == null) {
+
+                String errorMessages = "Id is required!";
+
+                CustomResponse<String> responseBody = new CustomResponse<>(errorMessages, "BAD_REQUEST",
+                        HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
+
+                return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+            }
+
+            Pageable pageable = PageRequest.of(page, size);
+
+            Page<UserBookViewDTO> getUserBooksByBookId = adminDAO.getUserBooksInfoByBookId(bookServiceDTO.getId(),
+                    pageable);
+
+            Map<String, Object> finalUserBooksList = new LinkedHashMap<>();
+            finalUserBooksList.put("users", getUserBooksByBookId.getContent());
+            finalUserBooksList.put("currentPage", getUserBooksByBookId.getNumber());
+            finalUserBooksList.put("totalItems", getUserBooksByBookId.getTotalElements());
+            finalUserBooksList.put("totalPages", getUserBooksByBookId.getTotalPages());
+
+            CustomResponse<?> responseBody = new CustomResponse<>(finalUserBooksList, "SUCCESS",
+                    HttpStatus.OK.value(),
+                    req.getRequestURI(), LocalDateTime.now());
+
+            return new ResponseEntity<>(responseBody, HttpStatus.OK);
+
+        } catch (Exception e) {
+
+            CustomResponse<String> responseBody = new CustomResponse<>(e.getMessage(),
+                    "BAD_REQUEST",
+                    HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
+            return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+
+        }
     }
 
 }

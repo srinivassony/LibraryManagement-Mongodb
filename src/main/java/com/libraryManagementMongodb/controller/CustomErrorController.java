@@ -14,7 +14,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
-public class CustomErrorController implements ErrorController{
+public class CustomErrorController implements ErrorController {
 
     @RequestMapping("/error")
     public ResponseEntity<?> handleError(HttpServletRequest request, HttpServletResponse res) {
@@ -46,6 +46,14 @@ public class CustomErrorController implements ErrorController{
 
             CustomResponse<String> responseBody = new CustomResponse<>(errorMessages, "FORBIDDEN_ERROR",
                     HttpStatus.FORBIDDEN.value(), request.getRequestURI(), LocalDateTime.now());
+
+            return new ResponseEntity<>(responseBody, HttpStatus.FORBIDDEN);
+        } else if (statusCode == 405) {
+
+            String errorMessages = "Method not allowed";
+
+            CustomResponse<String> responseBody = new CustomResponse<>(errorMessages, "METHOD_NOT_ALLOWED",
+                    HttpStatus.METHOD_NOT_ALLOWED.value(), request.getRequestURI(), LocalDateTime.now());
 
             return new ResponseEntity<>(responseBody, HttpStatus.FORBIDDEN);
         } else {

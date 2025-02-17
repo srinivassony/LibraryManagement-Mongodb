@@ -1,12 +1,16 @@
 package com.libraryManagementMongodb.model;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,8 +23,8 @@ import lombok.NoArgsConstructor;
 public class StudentBookCollection {
 
     @Id
-    @Field(name = "id")
-    private String id;
+    @Indexed(unique = true)
+    private String id = UUID.randomUUID().toString();
 
     @Field(name = "STATUS")
     private String status;
@@ -42,4 +46,14 @@ public class StudentBookCollection {
 
     @Field(name = "UPDATED_BY")
     private String updatedBy;
+
+    // Many-to-One: Each student book entry belongs to one user
+    @DBRef
+    @JsonIgnore
+    private UserCollection user;
+
+    // Many-to-One: Each student book entry is related to one book
+    @DBRef
+    @JsonIgnore
+    private BookCollection book;
 }
