@@ -1,11 +1,13 @@
 package com.libraryManagementMongodb.model;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
@@ -22,9 +24,8 @@ import lombok.NoArgsConstructor;
 public class UserCollection {
 
     @Id
-    @Field(name = "id")
     @Indexed(unique = true)
-    private String id =  UUID.randomUUID().toString();
+    private String id = UUID.randomUUID().toString();
 
     @Field(name = "USER_NAME")
     private String userName;
@@ -76,5 +77,8 @@ public class UserCollection {
 
     @Field(name = "UPDATED_BY")
     private String updatedBy;
+
+    @DBRef
+    private List<StudentBookCollection> studentBooks;
 
 }
