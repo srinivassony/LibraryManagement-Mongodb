@@ -6,10 +6,7 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
-@SpringBootApplication(scanBasePackages = "com.libraryManagement.mongodb")
-@ComponentScan(basePackages = "com.libraryManagementMongodb")
-@EnableMongoRepositories(basePackages = "com.libraryManagementMongodb.repository")
-// @EntityScan(basePackages = "com.library_management.entity")
+@SpringBootApplication
 public class LibraryManagementMongodbApplication {
 
 	public static void main(String[] args) {
