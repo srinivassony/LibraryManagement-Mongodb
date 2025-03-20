@@ -23,7 +23,7 @@ import com.libraryManagementMongodb.utill.UserInfo;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity(prePostEnabled = true)
+@EnableMethodSecurity
 public class SecurityConfig {
 
     @Autowired
