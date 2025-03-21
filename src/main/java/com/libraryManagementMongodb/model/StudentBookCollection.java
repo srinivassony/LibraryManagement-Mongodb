@@ -5,61 +5,33 @@ import java.util.UUID;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Document(collection = "lm_user")
+@Document(collection = "lm_studentBook")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserCollection {
+public class StudentBookCollection {
 
     @Id
     @Indexed(unique = true)
     private String id = UUID.randomUUID().toString();
 
-    @Field(name = "USER_NAME")
-    private String userName;
+    @Field(name = "STATUS")
+    private String status;
 
-    @Field(name = "EMAIL")
-    @Indexed(unique = true)
-    private String email;
-
-    @Field(name = "PASSWORD")
-    private String password;
-
-    @Field(name = "ROLE")
-    private String role;
-
-    @Field(name = "UUID")
-    @Indexed(unique = true)
-    private String uuid;
-
-    @Field(name = "PHONE")
-    private String phone;
-
-    @Field(name = "DOB")
-    @JsonFormat(pattern = "dd-MM-yyyy")
-    private String dob;
-
-    @Field(name = "ROLL_NO")
-    @Indexed(unique = true)
-    private String rollNo;
-
-    @Field(name = "COUNTRY")
-    private String country;
-
-    @Field(name = "STATE")
-    private String state;
-
-    @Field(name = "GENDER")
-    private String gender;
+    @Field(name = "SUBMISSION_DATE")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy'T'HH:mm:ss")
+    private LocalDateTime SubmissionDate;
 
     @Field(name = "CREATED_AT")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy'T'HH:mm:ss")
@@ -75,4 +47,13 @@ public class UserCollection {
     @Field(name = "UPDATED_BY")
     private String updatedBy;
 
+    // Many-to-One: Each student book entry belongs to one user
+    @DBRef
+    @JsonIgnore
+    private UserCollection user;
+
+    // Many-to-One: Each student book entry is related to one book
+    @DBRef
+    @JsonIgnore
+    private BookCollection book;
 }
